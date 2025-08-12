@@ -1,6 +1,6 @@
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form'; // Importe o Controller
 import { motion } from 'framer-motion';
-import InputMask from 'react-input-mask';
+// import InputMask from 'react-input-mask'; // REMOVIDO
 import { db } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import toast from 'react-hot-toast';
@@ -14,33 +14,49 @@ const coursesOptions = [
   'Programação',
 ];
 
+// Função auxiliar para formatar o número de telefone
+const formatPhoneNumber = (value) => {
+  if (!value) return "";
+  // Remove tudo que não for dígito
+  value = value.replace(/\D/g, '');
+  // Aplica a máscara (99) 99999-9999
+  value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
+  value = value.replace(/(\d{5})(\d)/, '$1-$2');
+  // Limita o tamanho máximo
+  return value.slice(0, 15); 
+};
+
+
 const InternshipForm = () => {
   const {
     register,
     handleSubmit,
     watch,
     reset,
+    control, // Adicione o control
     formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: {
-        completedCourses: []
+      completedCourses: [],
+      phone: ''
     }
   });
-  
+
   const showOtherCourseInput = watch('completedCourses')?.includes('Outros');
 
   const onSubmit = async (data) => {
     try {
-      // Adiciona a data de criação ao objeto de dados
       const submissionData = {
         ...data,
-        createdAt: serverTimestamp() 
+        // Remove a máscara antes de salvar no banco para ter apenas os números
+        phone: data.phone.replace(/\D/g, ''),
+        createdAt: serverTimestamp()
       };
 
       await addDoc(collection(db, 'inscricoes'), submissionData);
-      
+
       toast.success('Inscrição enviada com sucesso! Boa sorte!');
-      reset(); // Limpa o formulário após o envio
+      reset();
     } catch (error) {
       console.error("Erro ao enviar inscrição: ", error);
       toast.error('Houve um erro ao enviar sua inscrição. Tente novamente.');
@@ -70,16 +86,24 @@ const InternshipForm = () => {
           {errors.fullName && <p className="text-red-600 text-xs mt-1">{errors.fullName.message}</p>}
         </div>
 
-        {/* Telefone */}
+        {/* Telefone com Controller */}
         <div>
           <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Telefone (com DDD)</label>
-          <InputMask
-            mask="(99) 99999-9999"
-            id="phone"
-            {...register('phone', { required: 'O telefone é obrigatório.' })}
-          >
-            {(inputProps) => <input {...inputProps} type="tel" className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />}
-          </InputMask>
+          <Controller
+            name="phone"
+            control={control}
+            rules={{ required: 'O telefone é obrigatório.' }}
+            render={({ field }) => (
+              <input
+                {...field}
+                id="phone"
+                type="tel"
+                onChange={(e) => field.onChange(formatPhoneNumber(e.target.value))}
+                placeholder="(99) 99999-9999"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            )}
+          />
           {errors.phone && <p className="text-red-600 text-xs mt-1">{errors.phone.message}</p>}
         </div>
 
@@ -125,18 +149,18 @@ const InternshipForm = () => {
               </div>
             ))}
             <div className="flex items-center">
-                <input id="Outros" type="checkbox" value="Outros" {...register('completedCourses')} className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"/>
-                <label htmlFor="Outros" className="ml-2 block text-sm text-gray-900">Outros</label>
+              <input id="Outros" type="checkbox" value="Outros" {...register('completedCourses')} className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" />
+              <label htmlFor="Outros" className="ml-2 block text-sm text-gray-900">Outros</label>
             </div>
           </div>
           {showOtherCourseInput && (
             <div className="mt-3">
-                <input
-                    type="text"
-                    placeholder="Qual outro curso?"
-                    {...register('otherCourseName')}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                />
+              <input
+                type="text"
+                placeholder="Qual outro curso?"
+                {...register('otherCourseName')}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              />
             </div>
           )}
         </div>
