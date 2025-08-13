@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { FiBriefcase } from 'react-icons/fi';
+import Logo from '../assets/logo.png';
 
 const Header = () => {
   return (
@@ -11,14 +12,13 @@ const Header = () => {
           transition={{ duration: 0.5 }}
           className="flex items-center gap-3"
         >
-          <FiBriefcase className="w-8 h-8 text-indigo-600" />
-          <span className="font-display text-2xl font-bold text-gray-900">EstágioDev</span>
+          <img src={Logo} alt="logo" className="h-12"/>
         </motion.div>
         <motion.p
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
-          className="font-display text-lg text-indigo-600 font-semibold hidden md:block"
+          className="font-display text-lg text-[#ff304c] font-semibold hidden md:block"
         >
           O primeiro passo para sua carreira de sucesso.
         </motion.p>
