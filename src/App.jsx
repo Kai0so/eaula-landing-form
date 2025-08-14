@@ -1,5 +1,4 @@
 import { Toaster } from 'react-hot-toast';
-import Header from './components/Header';
 import { Routes, Route, Link } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import DashboardPage from './pages/DashboardPage';
