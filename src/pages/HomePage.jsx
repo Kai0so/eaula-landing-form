@@ -66,11 +66,6 @@ function HomePage() {
                   icon={<FiUsers className="w-6 h-6 text-[#ff304c]" />} 
                   title="Mentoria com profissionais experientes" 
                 />
-                 <BenefitItem 
-                  delay={0.6}
-                  icon={<FiClock className="w-6 h-6 text-[#ff304c]" />} 
-                  title="Horário flexível" 
-                />
               </div>
 
               {/* Seção "Como se inscrever" adicionada de volta */}
